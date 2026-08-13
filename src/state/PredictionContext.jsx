@@ -44,6 +44,7 @@ export function PredictionProvider({ children }) {
         }),
       reset: () => setPrediction(EMPTY_PREDICTION),
       loadPrediction: (data) => setPrediction({ ...EMPTY_PREDICTION, ...data }),
+      markSubmitted: (submittedAt) => setPrediction((p) => ({ ...p, submittedAt })),
     }),
     [prediction]
   );

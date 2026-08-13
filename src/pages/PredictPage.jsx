@@ -4,12 +4,22 @@ import UCLSection from "../components/UCLSection";
 import AwardsSection from "../components/AwardsSection";
 import RecapCard from "../components/RecapCard";
 import { usePrediction } from "../state/PredictionContext";
-import { useAuth } from "../state/AuthContext";
 import { LIGUE1, PREMIER_LEAGUE, LALIGA } from "../data/clubs";
 import { AWARD_CATEGORIES, LIGUE1_SCORERS, PREMIER_LEAGUE_SCORERS, LALIGA_SCORERS } from "../data/players";
 import { isSupabaseConfigured } from "../config/supabase";
-import { upsertPrediction, fetchMyPrediction } from "../utils/predictionsApi";
+import { sendPrediction, ERR_NAME_TAKEN } from "../utils/predictionsApi";
 import "./PredictPage.css";
+
+const SUBMITTED_KEY = "pronos-saison:submitted";
+
+function loadSubmitted() {
+  try {
+    const raw = localStorage.getItem(SUBMITTED_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 function buildSummaryText(prediction) {
   const name = (list, id) => list.find((c) => c.id === id)?.name || "—";
@@ -46,28 +56,21 @@ Flop : ${award("flop")}`;
 }
 
 export default function PredictPage() {
-  const { prediction, setDisplayName, loadPrediction } = usePrediction();
-  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
-  const [sendState, setSendState] = useState("idle"); // idle | sending | sent | error
-  const [prefilled, setPrefilled] = useState(false);
+  const { prediction, setDisplayName, markSubmitted } = usePrediction();
+  const [submitted, setSubmitted] = useState(loadSubmitted);
+  const [sendState, setSendState] = useState(submitted ? "sent" : "idle"); // idle | sending | sent | error
+  const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
   const summary = useMemo(() => buildSummaryText(prediction), [prediction]);
   const supabaseReady = useMemo(() => isSupabaseConfigured(), []);
 
-  // Si l'ami s'est déjà connecté et a déjà envoyé un prono, on précharge sa fiche
-  // pour qu'il puisse la corriger avant le début de la saison.
+  // Fiche déjà envoyée depuis ce navigateur (persistée localement) : on ré-affiche la
+  // date figée sur la RecapCard même après un rechargement de page.
   useEffect(() => {
-    if (!user || prefilled || !supabaseReady) return;
-    setPrefilled(true);
-    fetchMyPrediction(user.id)
-      .then((existing) => {
-        if (existing) loadPrediction(existing);
-        else if (!prediction.displayName) setDisplayName(user.user_metadata?.full_name || "");
-      })
-      .catch(() => {});
+    if (submitted) markSubmitted(submitted.submittedAt);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, supabaseReady]);
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(summary);
@@ -77,10 +80,20 @@ export default function PredictPage() {
 
   const handleSend = async () => {
     setSendState("sending");
+    setErrorMsg("");
     try {
-      await upsertPrediction(user.id, prediction);
+      const saved = await sendPrediction(prediction);
+      const record = { displayName: saved.displayName, submittedAt: saved.submittedAt };
+      localStorage.setItem(SUBMITTED_KEY, JSON.stringify(record));
+      setSubmitted(record);
+      markSubmitted(saved.submittedAt);
       setSendState("sent");
-    } catch {
+    } catch (err) {
+      setErrorMsg(
+        err?.message === ERR_NAME_TAKEN
+          ? "❌ Ce pseudo est déjà pris par quelqu'un d'autre — choisis-en un autre (ou vérifie que tu n'as pas déjà envoyé ta fiche)."
+          : "❌ L'envoi a échoué. Vérifie ta connexion et réessaie."
+      );
       setSendState("error");
     }
   };
@@ -92,30 +105,16 @@ export default function PredictPage() {
           Fais tes <span className="predict-page__accent">pronos</span> avant le coup d'envoi 🎙️
         </h1>
         <p className="text-muted">
-          Remplis ta fiche comme au FC Silmi, connecte-toi avec Google puis clique sur "Envoyer mon prono" tout
-          en bas — c'est instantané, personne d'autre ne peut voir ta fiche avant que tu l'envoies.
+          Remplis ta fiche comme au FC Silmi, choisis un pseudo puis clique sur "Envoyer mon prono" tout en bas.
+          Attention : une fois envoyée, ta fiche est <strong>définitivement figée</strong> (impossible à modifier
+          ou supprimer) et la date d'envoi est visible par tout le monde — vérifie bien avant d'envoyer !
         </p>
 
-        {!supabaseReady ? (
+        {!supabaseReady && (
           <p className="warning-banner">
             ⚠️ Le site n'est pas encore relié à Supabase (voir README § "Collecte des pronos" —
             src/config/supabase.js).
           </p>
-        ) : authLoading ? (
-          <p className="text-muted">Chargement…</p>
-        ) : user ? (
-          <div className="predict-page__account">
-            <span>
-              Connecté en tant que <strong>{user.email}</strong>
-            </span>
-            <button className="predict-page__signout" onClick={signOut} type="button">
-              Se déconnecter
-            </button>
-          </div>
-        ) : (
-          <button className="btn btn--primary" onClick={signInWithGoogle} type="button">
-            🔐 Se connecter avec Google
-          </button>
         )}
 
         <input
@@ -123,6 +122,7 @@ export default function PredictPage() {
           placeholder="Ton prénom / pseudo"
           value={prediction.displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          disabled={sendState === "sent"}
         />
       </div>
 
@@ -176,28 +176,23 @@ export default function PredictPage() {
 
         {sendState === "sent" ? (
           <p className="predict-page__sent">
-            ✅ Prono envoyé ! Il apparaît déjà dans "Les participants", en direct, pour tout le groupe. Tu peux
-            revenir modifier ta fiche à tout moment tant que la saison n'a pas commencé.
+            ✅ Prono envoyé sous le pseudo « {submitted?.displayName} » ! Il apparaît déjà dans "Les
+            participants", en direct, pour tout le groupe — figé définitivement, impossible à modifier.
           </p>
         ) : (
           <>
-            {sendState === "error" && (
-              <p className="warning-banner">
-                ❌ L'envoi a échoué. Vérifie ta connexion et réessaie.
-              </p>
-            )}
+            {sendState === "error" && <p className="warning-banner">{errorMsg}</p>}
             <p className="text-muted">
-              {user
-                ? "Un clic suffit : ton prono part directement, personne ne peut voir ni modifier celui des autres."
-                : "Connecte-toi avec Google ci-dessus pour pouvoir envoyer ton prono."}
+              Un clic suffit : ton prono part directement, en clair pour tout le groupe. Relis bien ta fiche
+              ci-dessus avant d'envoyer, tu ne pourras plus la changer ensuite.
             </p>
             <button
               className="btn btn--primary predict-page__send-btn"
               onClick={handleSend}
-              disabled={!supabaseReady || !user || !prediction.displayName || sendState === "sending"}
+              disabled={!supabaseReady || !prediction.displayName || sendState === "sending"}
               type="button"
             >
-              {sendState === "sending" ? "Envoi en cours..." : "🚀 Envoyer mon prono"}
+              {sendState === "sending" ? "Envoi en cours..." : "🚀 Envoyer mon prono (définitif)"}
             </button>
           </>
         )}

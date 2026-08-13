@@ -1,13 +1,15 @@
 import { supabase } from "../config/supabase";
 import { pickColor } from "./avatarColor";
 
-// Table `predictions` (voir supabase/schema.sql) : 1 ligne par participant, clé primaire
-// user_id = auth.uid(). Les règles RLS garantissent que chacun ne peut écrire QUE sa
-// propre ligne, même si quelqu'un bidouille les appels réseau depuis la console.
+// Table `predictions` (voir supabase/schema.sql) : 1 ligne par participant, identifiée
+// par un pseudo unique (pas de compte / connexion). Les règles RLS n'autorisent QUE la
+// lecture publique et l'insertion — aucune règle "update"/"delete" n'existe, donc une
+// fiche envoyée est techniquement impossible à modifier ou supprimer, même en
+// trafiquant les appels réseau depuis la console.
 
 function rowToPrediction(row) {
   return {
-    username: row.user_id,
+    id: row.id,
     displayName: row.display_name,
     avatarColor: row.avatar_color,
     submittedAt: row.submitted_at,
@@ -19,29 +21,32 @@ function rowToPrediction(row) {
   };
 }
 
-function predictionToRow(userId, prediction) {
+function predictionToRow(prediction) {
   return {
-    user_id: userId,
     display_name: prediction.displayName,
-    avatar_color: prediction.avatarColor || pickColor(userId),
+    avatar_color: prediction.avatarColor || pickColor(prediction.displayName),
     ligue1: prediction.ligue1,
     premier_league: prediction.premierLeague,
     laliga: prediction.laliga,
     ucl: prediction.ucl,
     awards: prediction.awards,
-    submitted_at: new Date().toISOString(),
   };
 }
 
-export async function upsertPrediction(userId, prediction) {
-  const { error } = await supabase.from("predictions").upsert(predictionToRow(userId, prediction));
-  if (error) throw error;
-}
+// Erreur Postgres 23505 = violation de contrainte unique (pseudo déjà pris).
+export const ERR_NAME_TAKEN = "NAME_TAKEN";
 
-export async function fetchMyPrediction(userId) {
-  const { data, error } = await supabase.from("predictions").select("*").eq("user_id", userId).maybeSingle();
-  if (error) throw error;
-  return data ? rowToPrediction(data) : null;
+export async function sendPrediction(prediction) {
+  const { data, error } = await supabase
+    .from("predictions")
+    .insert(predictionToRow(prediction))
+    .select()
+    .single();
+  if (error) {
+    if (error.code === "23505") throw new Error(ERR_NAME_TAKEN);
+    throw error;
+  }
+  return rowToPrediction(data);
 }
 
 export async function fetchAllPredictions() {
@@ -50,7 +55,7 @@ export async function fetchAllPredictions() {
   return (data || []).map(rowToPrediction);
 }
 
-// Abonnement temps réel : callback rappelé avec la liste à jour à chaque insert/update.
+// Abonnement temps réel : callback rappelé avec la liste à jour à chaque insert.
 // Retourne une fonction de désabonnement à appeler au démontage du composant.
 export function subscribeToPredictions(onChange) {
   fetchAllPredictions().then(onChange).catch(() => {});

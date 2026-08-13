@@ -18,12 +18,12 @@ export default function ParticipantsPage() {
     const unsubscribe = subscribeToPredictions((list) => {
       setUsers(list);
       setLoading(false);
-      setSelected((prev) => (prev && list.some((u) => u.username === prev) ? prev : list[0]?.username ?? null));
+      setSelected((prev) => (prev && list.some((u) => u.id === prev) ? prev : list[0]?.id ?? null));
     });
     return unsubscribe;
   }, [supabaseReady]);
 
-  const current = users.find((u) => u.username === selected) || null;
+  const current = users.find((u) => u.id === selected) || null;
 
   return (
     <div className="participants-page container">
@@ -53,7 +53,7 @@ export default function ParticipantsPage() {
           onChange={(e) => setSelected(e.target.value)}
         >
           {users.map((u) => (
-            <option key={u.username} value={u.username}>
+            <option key={u.id} value={u.id}>
               {u.displayName}
             </option>
           ))}
@@ -63,12 +63,12 @@ export default function ParticipantsPage() {
       <div className="participants-page__cards">
         {users.map((u) => (
           <button
-            key={u.username}
+            key={u.id}
             className={`participants-page__user-card neon-border ${
-              u.username === selected ? "is-active" : ""
+              u.id === selected ? "is-active" : ""
             }`}
             style={{ "--accent": u.avatarColor }}
-            onClick={() => setSelected(u.username)}
+            onClick={() => setSelected(u.id)}
             type="button"
           >
             <span className="participants-page__avatar">{u.displayName[0].toUpperCase()}</span>

@@ -24,27 +24,6 @@
   text-shadow: 0 0 20px var(--red-glow);
 }
 
-.predict-page__account {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.9rem;
-}
-
-.predict-page__signout {
-  background: transparent;
-  border: 1px solid var(--border-soft);
-  color: var(--text-mid);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  font-size: 0.8rem;
-}
-
-.predict-page__signout:hover {
-  border-color: var(--text-hi);
-  color: var(--text-hi);
-}
-
 .predict-page__name-input {
   align-self: center;
   width: 100%;

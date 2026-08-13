@@ -40,7 +40,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
   const ll = prediction.laliga || {};
   const ucl = prediction.ucl || {};
   const awards = prediction.awards || {};
-  const lastModified = formatDate(prediction.submittedAt);
+  const submittedDate = formatDate(prediction.submittedAt);
 
   const findAward = (catId) => {
     const cat = AWARD_CATEGORIES.find((c) => c.id === catId);
@@ -149,7 +149,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
 
         <div className="recap-card__footer">
           <span className="text-muted recap-card__timestamp">
-            {lastModified ? `🔒 Dernière modif. : ${lastModified}` : "📝 Brouillon non envoyé"}
+            {submittedDate ? `🔒 Envoyé le ${submittedDate} — figé définitivement` : "📝 Brouillon non envoyé"}
           </span>
           <span className="pill pill--red">#LesPronosDeSaison</span>
         </div>

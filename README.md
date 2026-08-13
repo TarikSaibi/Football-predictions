@@ -21,7 +21,7 @@ Football-predictions/
 │   ├── config/supabase.js      # URL + clé publique Supabase (à remplir, voir §2)
 │   ├── data/                   # clubs.js, players.js — données de référence statiques
 │   ├── pages/                  # PredictPage (formulaire + envoi), ParticipantsPage (galerie live)
-│   ├── state/                  # PredictionContext (brouillon local), AuthContext (connexion Google)
+│   ├── state/                  # PredictionContext (brouillon local)
 │   ├── styles/global.css       # Design system Winamax TV (dark + néon + glassmorphism)
 │   ├── utils/                  # flags.js, avatarColor.js, predictionsApi.js (lecture/écriture Supabase)
 │   ├── App.jsx
@@ -33,26 +33,29 @@ Football-predictions/
 
 **Stack :** React 18 + Vite, `react-router-dom` (HashRouter, compatible GitHub Pages sans
 config serveur), `html-to-image` pour l'export PNG de la fiche récap, `@supabase/supabase-js`
-pour l'authentification et le stockage temps réel. Les données de référence (clubs,
-joueurs) restent des fichiers JS statiques ; les pronos du groupe vivent dans Supabase.
+pour le stockage temps réel. Les données de référence (clubs, joueurs) restent des
+fichiers JS statiques ; les pronos du groupe vivent dans Supabase. Pas de compte, pas de
+connexion : chaque pote choisit juste un pseudo.
 
 ## 2. Comment les pronos sont stockés et partagés (gratuit, sans backend à héberger)
 
-**Recommandation : Supabase (Postgres + Auth + Realtime), plan gratuit.**
+**Recommandation : Supabase (Postgres + Realtime), plan gratuit.**
 
 ### Comment ça marche concrètement
 
-1. Ton pote ouvre le site, clique **"🔐 Se connecter avec Google"**.
-2. Il remplit sa fiche stylée, clique **"🚀 Envoyer mon prono"**.
+1. Ton pote ouvre le site, choisit un pseudo et remplit sa fiche stylée.
+2. Il clique **"🚀 Envoyer mon prono"**.
 3. Le navigateur écrit directement sa ligne dans la table `predictions` sur Supabase
-   (`src/utils/predictionsApi.js`), identifiée par son compte Google.
+   (`src/utils/predictionsApi.js`).
 4. La page **"Les participants"** est abonnée en temps réel (`Realtime` Supabase) : la
    fiche apparaît **instantanément** chez tout le monde, sans rebuild, sans attendre.
-5. Il peut revenir plus tard mettre à jour sa fiche (même page, même bouton) — la ligne
-   est mise à jour, avec une nouvelle date de dernière modification visible par tous.
+5. Sa fiche est alors **figée définitivement** — impossible de la modifier ou de la
+   supprimer, même pour lui. La date d'envoi (`submitted_at`) reste affichée sur sa
+   fiche, visible par tout le groupe, comme preuve que rien n'a bougé depuis.
 
 Pas de GitHub Pages à reconstruire pour chaque prono, pas de Google Form caché, pas de
-jeton à faire circuler : le site parle directement (et en toute sécurité) à Supabase.
+jeton à faire circuler, pas de compte à créer : le site parle directement (et en toute
+sécurité) à Supabase.
 
 ### Pourquoi cette solution plutôt qu'une autre
 
@@ -60,48 +63,46 @@ jeton à faire circuler : le site parle directement (et en toute sécurité) à 
 |---|---|
 | Écriture directe dans le repo GitHub (JS + token) | Le token serait visible côté client → n'importe qui pourrait écrire/écraser les fichiers des autres. **À bannir.** |
 | Google Form + Apps Script + commit GitHub | Fonctionne, mais ajoute un rebuild GitHub Pages (1-2 min de latence) et une pièce mobile de plus (Apps Script) pour un résultat moins "temps réel". |
-| **Supabase (Postgres + Auth + Realtime)** | Gratuit (plan Free très généreux pour 10-20 utilisateurs), écriture directe et instantanée, sécurité appliquée **côté serveur** par des règles Row Level Security — pas par la confidentialité d'une clé. |
+| **Supabase (Postgres + Realtime)** | Gratuit (plan Free très généreux pour 10-20 utilisateurs), écriture directe et instantanée, sécurité appliquée **côté serveur** par des règles Row Level Security — pas par la confidentialité d'une clé, ni par un compte utilisateur. |
 
-### Comment ça empêche la triche
+### Comment ça empêche la triche (sans aucune connexion/compte)
 
-1. **Chacun ne peut écrire que sa propre ligne.** La table `predictions` a pour clé
-   primaire l'identifiant Google de l'utilisateur (`auth.uid()`), et les règles *Row
-   Level Security* (voir `supabase/schema.sql`) n'autorisent l'écriture que si
-   `auth.uid() = user_id`. C'est **Supabase lui-même** qui refuse la requête si quelqu'un
-   essaie d'écrire dans la fiche d'un autre — impossible à contourner depuis le
+1. **Une fiche envoyée est techniquement impossible à modifier ou supprimer.** Les
+   règles *Row Level Security* (voir `supabase/schema.sql`) n'autorisent que la lecture
+   et l'insertion — aucune règle `update` ni `delete` n'existe. En RLS, l'absence de
+   policy pour une commande bloque cette commande pour tout le monde, sans exception :
+   **Supabase lui-même** refuse la requête, impossible à contourner depuis le
    navigateur, même en trafiquant le code.
-2. **Connexion Google obligatoire pour envoyer un prono.** Un compte Google = une seule
-   fiche (upsert sur `user_id`), impossible de se faire passer pour un autre participant.
+2. **Le pseudo est unique.** Impossible pour quelqu'un d'envoyer une fiche sous un
+   pseudo déjà pris — la base de données rejette l'insertion (contrainte `unique`,
+   insensible à la casse).
 3. **La clé publique Supabase (`anon key`) n'est pas un secret.** Contrairement à un
    token GitHub, elle est conçue pour être visible côté client — elle identifie juste le
    projet, elle ne donne aucun droit d'écriture en elle-même (ce sont les règles RLS qui
    décident).
-4. **Date de dernière modification visible.** Chaque fiche récap affiche
-   `🔒 Dernière modif. : <date/heure>` (`submitted_at`, régénéré à chaque
-   soumission/mise à jour) — tout le monde peut vérifier que personne n'a modifié ses
-   pronos après le début de la saison.
-5. **Lecture publique, écriture privée.** Tout le monde peut *consulter* toutes les
-   fiches (page "Les participants"), mais seule la règle du point 1 autorise l'écriture.
+4. **Date d'envoi visible et figée.** Chaque fiche récap affiche `🔒 Envoyé le
+   <date/heure> — figé définitivement` (`submitted_at`) — tout le monde peut vérifier
+   quand chaque prono a été envoyé, et savoir qu'il n'a plus bougé depuis.
+5. **Lecture publique, écriture publique une seule fois.** Tout le monde peut
+   *consulter* toutes les fiches (page "Les participants") et en *envoyer* une, mais
+   plus jamais la modifier une fois partie.
 
-### Mise en place (10-15 minutes, une seule fois)
+Seul angle mort (accepté, groupe de potes qui se connaissent) : rien n'empêche
+techniquement quelqu'un d'envoyer une fiche bidon sous le pseudo d'un ami avant que
+celui-ci envoie la sienne — le pseudo serait alors "pris". Ce serait immédiatement
+visible (mauvaise fiche sous son nom) et n'a aucun intérêt pour tricher sur son propre
+classement.
+
+### Mise en place (5-10 minutes, une seule fois)
 
 1. Créez un compte sur [supabase.com](https://supabase.com) (gratuit) et un nouveau
    projet.
 2. **Base de données** : ouvrez `SQL Editor` dans le dashboard, collez le contenu de
    `supabase/schema.sql`, cliquez `Run`. Ça crée la table `predictions` + les règles de
    sécurité + active le temps réel dessus.
-3. **Authentification Google** : `Authentication > Sign in / Providers > Google` →
-   activez-le. Il vous demandera un *Client ID* et un *Client Secret* Google : créez-les
-   gratuitement sur [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-   (type "OAuth client ID" > "Web application"), en ajoutant l'URL de callback que
-   Supabase vous affiche dans le champ "Authorized redirect URIs".
-4. **Domaines autorisés** : `Authentication > URL Configuration` → ajoutez
-   `https://TarikSaibi.github.io/Football-predictions/` en `Site URL` et dans
-   `Redirect URLs` (sinon la connexion Google refusera de rediriger vers votre site une
-   fois déployé).
-5. **Connecter le site à Supabase** : `Project Settings > API` → copiez `Project URL` et
+3. **Connecter le site à Supabase** : `Project Settings > API` → copiez `Project URL` et
    la clé `anon public`, collez-les dans `src/config/supabase.js`.
-6. Commitez et poussez — c'est prêt, tout le monde peut se connecter et pronostiquer.
+4. Commitez et poussez — c'est prêt, tout le monde peut pronostiquer.
 
 ## 3. Lancer le projet en local
 
