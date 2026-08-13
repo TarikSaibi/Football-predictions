@@ -1,0 +1,11 @@
+{
+  "username": "yanis",
+  "displayName": "Yanis",
+  "avatarColor": "#2d8cff",
+  "submittedAt": "2026-08-08T14:12:00Z",
+  "ligue1": { "champion": "asm", "top4": ["asm", "psg", "om", "sr"], "relegated": ["aja", "hac", "saco"] },
+  "premierLeague": { "champion": "mci", "top4": ["mci", "liv", "ars", "new"] },
+  "laliga": { "champion": "atm" },
+  "ucl": { "winner": "psg", "finalist": "mci" },
+  "awards": { "ballonDor": "dembele", "topScorer": "osimhen", "revelation": "kenan-yildiz", "flop": "hakim-ziyech" }
+}

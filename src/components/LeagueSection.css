@@ -1,0 +1,35 @@
+.league-section {
+  padding: 24px;
+}
+
+.league-section__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.league-section__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.league-section__label {
+  width: fit-content;
+}
+
+.league-section__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.awards-grid .player-card {
+  max-width: 320px;
+}

@@ -1,0 +1,11 @@
+{
+  "username": "lea",
+  "displayName": "Léa",
+  "avatarColor": "#ffe600",
+  "submittedAt": "2026-08-07T21:40:00Z",
+  "ligue1": { "champion": "psg", "top4": ["psg", "asm", "ol", "rcl"], "relegated": ["saco", "fcm", "sb29"] },
+  "premierLeague": { "champion": "liv", "top4": ["liv", "mci", "che", "ars"] },
+  "laliga": { "champion": "rma" },
+  "ucl": { "winner": "liv", "finalist": "rma" },
+  "awards": { "ballonDor": "bellingham", "topScorer": "kane", "revelation": "estevao", "flop": "romelu-lukaku" }
+}

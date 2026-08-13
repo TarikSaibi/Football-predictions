@@ -1,0 +1,61 @@
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-panel);
+  border-radius: var(--radius-md);
+  text-align: left;
+  color: var(--text-hi);
+}
+
+.player-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-family: var(--font-display);
+  background: linear-gradient(135deg, var(--accent, var(--red)), #1c1c20);
+  color: white;
+  flex-shrink: 0;
+}
+
+.player-card__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.player-card__name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-card__club {
+  font-size: 0.78rem;
+}
+
+.player-card--empty {
+  border: 1px dashed var(--border-soft);
+  background: transparent;
+  justify-content: center;
+  color: var(--text-low);
+  min-height: 64px;
+}
+
+.player-card--empty:hover {
+  border-color: var(--text-mid);
+  color: var(--text-mid);
+}
+
+.player-card__plus {
+  font-size: 1.3rem;
+  line-height: 1;
+}

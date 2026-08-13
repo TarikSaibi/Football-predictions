@@ -1,0 +1,78 @@
+.predict-page {
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.predict-page__hero {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.predict-page__hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.predict-page__accent {
+  color: var(--red);
+  text-shadow: 0 0 20px var(--red-glow);
+}
+
+.predict-page__name-input {
+  align-self: center;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--bg-panel);
+  color: var(--text-hi);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.predict-page__name-input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+.predict-page__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.predict-page__recap {
+  margin-top: 12px;
+}
+
+.predict-page__submit {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.predict-page__summary {
+  width: 100%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  color: var(--text-mid);
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  padding: 14px;
+  resize: vertical;
+}
+
+.predict-page__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

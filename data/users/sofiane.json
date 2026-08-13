@@ -1,0 +1,11 @@
+{
+  "username": "sofiane",
+  "displayName": "Sofiane",
+  "avatarColor": "#39ff88",
+  "submittedAt": "2026-08-06T09:05:00Z",
+  "ligue1": { "champion": "om", "top4": ["om", "psg", "ol", "losc"], "relegated": ["fcm", "hac", "sdr"] },
+  "premierLeague": { "champion": "ars", "top4": ["ars", "mci", "liv", "tot"] },
+  "laliga": { "champion": "fcb" },
+  "ucl": { "winner": "mci", "finalist": "fcb" },
+  "awards": { "ballonDor": "yamal", "topScorer": "mbappe", "revelation": "desire-doue", "flop": "jadon-sancho" }
+}

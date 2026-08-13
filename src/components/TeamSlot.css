@@ -1,0 +1,40 @@
+.team-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-panel);
+  border-radius: var(--radius-md);
+  color: var(--text-hi);
+  padding: 12px 8px;
+}
+
+.team-slot--md {
+  width: 96px;
+  height: 96px;
+}
+
+.team-slot--lg {
+  width: 128px;
+  height: 128px;
+}
+
+.team-slot__plus {
+  font-size: 1.6rem;
+  color: var(--text-low);
+  line-height: 1;
+}
+
+.team-slot__label {
+  font-size: 0.68rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.team-slot__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}

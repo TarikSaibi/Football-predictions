@@ -1,0 +1,64 @@
+.participants-page {
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.participants-page__toolbar {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .participants-page__toolbar {
+    display: block;
+  }
+  .participants-page__cards {
+    display: none;
+  }
+}
+
+.participants-page__select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--bg-panel);
+  color: var(--text-hi);
+  font-size: 1rem;
+}
+
+.participants-page__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.participants-page__user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 10px 10px;
+  background: var(--bg-panel);
+  border-radius: 999px;
+  color: var(--text-hi);
+  font-weight: 600;
+}
+
+.participants-page__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent, var(--red)), #1c1c20);
+}
+
+.participants-page__recap {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
