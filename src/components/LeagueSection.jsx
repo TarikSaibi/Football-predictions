@@ -1,29 +1,31 @@
 import { useState } from "react";
 import TeamSlot from "./TeamSlot";
+import PlayerCard from "./PlayerCard";
 import SelectorModal from "./SelectorModal";
 import { usePrediction } from "../state/PredictionContext";
 import "./LeagueSection.css";
 
-// Section générique "Championnat" : Champion (+ éventuellement TOP4 / Relégués).
-export default function LeagueSection({ sectionKey, title, icon, accentColor, clubs, showTop4, showRelegated }) {
+// Section générique "Championnat" : Champion (+ éventuellement TOP4 / Meilleur buteur).
+export default function LeagueSection({ sectionKey, title, icon, accentColor, clubs, showTop4, scorers }) {
   const { prediction, setField, setArrayField } = usePrediction();
   const data = prediction[sectionKey];
-  const [picker, setPicker] = useState(null); // { type: 'champion' | 'top4' | 'relegated', index }
+  const [picker, setPicker] = useState(null); // { type: 'champion' | 'top4' | 'scorer', index }
 
   const findClub = (id) => clubs.find((c) => c.id === id) || null;
+  const findScorer = (id) => scorers?.find((p) => p.id === id) || null;
 
-  const usedIds = [
-    data.champion,
-    ...(data.top4 || []),
-    ...(data.relegated || []),
-  ].filter(Boolean);
+  const usedClubIds = [data.champion, ...(data.top4 || [])].filter(Boolean);
 
   const closePicker = () => setPicker(null);
 
-  const handlePick = (club) => {
+  const handlePickClub = (club) => {
     if (picker.type === "champion") setField(sectionKey, "champion", club.id);
     if (picker.type === "top4") setArrayField(sectionKey, "top4", picker.index, club.id);
-    if (picker.type === "relegated") setArrayField(sectionKey, "relegated", picker.index, club.id);
+    closePicker();
+  };
+
+  const handlePickScorer = (player) => {
+    setField(sectionKey, "topScorer", player.id);
     closePicker();
   };
 
@@ -63,30 +65,28 @@ export default function LeagueSection({ sectionKey, title, icon, accentColor, cl
           </div>
         )}
 
-        {showRelegated && (
+        {scorers && (
           <div className="league-section__group">
-            <span className="league-section__label pill pill--red">Relégués</span>
-            <div className="league-section__slots">
-              {data.relegated.map((id, i) => (
-                <TeamSlot
-                  key={i}
-                  label={`Reléc. ${i + 1}`}
-                  club={findClub(id)}
-                  onClick={() => setPicker({ type: "relegated", index: i })}
-                />
-              ))}
+            <span className="league-section__label pill pill--yellow">⚽ Meilleur Buteur</span>
+            <div className="league-section__scorer">
+              <PlayerCard
+                player={findScorer(data.topScorer)}
+                selected={Boolean(data.topScorer)}
+                onClick={() => setPicker({ type: "scorer" })}
+                accent={accentColor}
+              />
             </div>
           </div>
         )}
       </div>
 
-      {picker && (
+      {picker && picker.type !== "scorer" && (
         <SelectorModal
           title={`Choisir un club — ${title}`}
           items={clubs}
           getLabel={(c) => c.name}
-          excludeIds={usedIds}
-          onPick={handlePick}
+          excludeIds={usedClubIds}
+          onPick={handlePickClub}
           onClose={closePicker}
           renderItem={(club) => (
             <>
@@ -94,6 +94,18 @@ export default function LeagueSection({ sectionKey, title, icon, accentColor, cl
               <span style={{ fontSize: "0.78rem" }}>{club.name}</span>
             </>
           )}
+        />
+      )}
+
+      {picker && picker.type === "scorer" && (
+        <SelectorModal
+          title={`Meilleur buteur — ${title}`}
+          items={scorers}
+          getLabel={(p) => p.name}
+          excludeIds={[]}
+          onPick={handlePickScorer}
+          onClose={closePicker}
+          renderItem={(player) => <PlayerCard player={player} onClick={() => {}} accent={accentColor} />}
         />
       )}
     </section>

@@ -113,8 +113,14 @@
 .recap-card__footer {
   margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   position: relative;
+}
+
+.recap-card__timestamp {
+  font-size: 0.75rem;
 }
 
 @media (max-width: 640px) {

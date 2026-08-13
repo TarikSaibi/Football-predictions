@@ -1,7 +1,28 @@
-// Blason généré en SVG (aucune image externe nécessaire).
-// Remplacez-le à terme par de vrais logos dans /assets/images/clubs/<id>.svg (voir README).
+import { useState } from "react";
+
+// Charge un vrai logo depuis /public/logos/clubs/<id>.png si présent
+// (voir public/logos/clubs/README.md pour la marche à suivre). Sinon,
+// repli automatique sur un blason SVG généré (aucune image externe requise).
 export default function TeamBadge({ club, size = 48 }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   if (!club) return null;
+
+  const logoSrc = `${import.meta.env.BASE_URL}logos/clubs/${club.id}.png`;
+
+  if (!imgFailed) {
+    return (
+      <img
+        src={logoSrc}
+        width={size}
+        height={size}
+        alt={club.name}
+        style={{ objectFit: "contain", flexShrink: 0 }}
+        onError={() => setImgFailed(true)}
+      />
+    );
+  }
+
   const { short, colorA, colorB } = club;
   const gradId = `grad-${club.id}`;
 

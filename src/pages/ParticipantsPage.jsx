@@ -1,11 +1,27 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import RecapCard from "../components/RecapCard";
-import { loadAllPredictions } from "../data/loadUsers";
+import { subscribeToPredictions } from "../utils/predictionsApi";
+import { isSupabaseConfigured } from "../config/supabase";
 import "./ParticipantsPage.css";
 
 export default function ParticipantsPage() {
-  const users = useMemo(() => loadAllPredictions(), []);
-  const [selected, setSelected] = useState(users[0]?.username ?? null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const supabaseReady = isSupabaseConfigured();
+
+  useEffect(() => {
+    if (!supabaseReady) {
+      setLoading(false);
+      return;
+    }
+    const unsubscribe = subscribeToPredictions((list) => {
+      setUsers(list);
+      setLoading(false);
+      setSelected((prev) => (prev && list.some((u) => u.username === prev) ? prev : list[0]?.username ?? null));
+    });
+    return unsubscribe;
+  }, [supabaseReady]);
 
   const current = users.find((u) => u.username === selected) || null;
 
@@ -15,10 +31,20 @@ export default function ParticipantsPage() {
         <span className="accent" />
         <h1>Les pronos du groupe 👥</h1>
       </div>
-      <p className="text-muted">
-        {users.length} participant{users.length > 1 ? "s ont" : " a"} déjà envoyé sa fiche. Choisis un nom pour
-        consulter ses prédictions.
-      </p>
+
+      {!supabaseReady ? (
+        <p className="warning-banner">
+          ⚠️ Le site n'est pas encore relié à Supabase (voir README § "Collecte des pronos").
+        </p>
+      ) : (
+        <p className="text-muted">
+          <span className="participants-page__live">🔴 En direct</span> —{" "}
+          {loading
+            ? "Chargement…"
+            : `${users.length} participant${users.length > 1 ? "s ont" : users.length === 1 ? " a" : ""} déjà envoyé sa fiche.`}{" "}
+          Choisis un nom pour consulter ses prédictions.
+        </p>
+      )}
 
       <div className="participants-page__toolbar">
         <select
@@ -57,7 +83,7 @@ export default function ParticipantsPage() {
         </div>
       )}
 
-      {users.length === 0 && (
+      {!loading && supabaseReady && users.length === 0 && (
         <p className="text-muted">Aucune fiche pour le moment — reviens quand le groupe aura répondu !</p>
       )}
     </div>

@@ -2,11 +2,12 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import TeamBadge from "./TeamBadge";
 import { LIGUE1, PREMIER_LEAGUE, LALIGA, UCL_CONTENDERS } from "../data/clubs";
-import { AWARD_CATEGORIES } from "../data/players";
+import { AWARD_CATEGORIES, LIGUE1_SCORERS, PREMIER_LEAGUE_SCORERS, LALIGA_SCORERS } from "../data/players";
 import { flagEmoji } from "../utils/flags";
 import "./RecapCard.css";
 
 const findClub = (list, id) => list.find((c) => c.id === id) || null;
+const findPlayer = (list, id) => list.find((p) => p.id === id) || null;
 
 function MiniTeam({ club }) {
   if (!club) return <span className="recap-card__empty">—</span>;
@@ -18,6 +19,18 @@ function MiniTeam({ club }) {
   );
 }
 
+function formatDate(iso) {
+  if (!iso) return null;
+  try {
+    return new Intl.DateTimeFormat("fr-FR", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(iso));
+  } catch {
+    return null;
+  }
+}
+
 export default function RecapCard({ prediction, accentColor = "#e10600" }) {
   const cardRef = useRef(null);
   const [exporting, setExporting] = useState(false);
@@ -27,6 +40,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
   const ll = prediction.laliga || {};
   const ucl = prediction.ucl || {};
   const awards = prediction.awards || {};
+  const lastModified = formatDate(prediction.submittedAt);
 
   const findAward = (catId) => {
     const cat = AWARD_CATEGORIES.find((c) => c.id === catId);
@@ -70,11 +84,9 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
                 <MiniTeam key={i} club={findClub(LIGUE1, id)} />
               ))}
             </p>
-            <p className="recap-card__row">
-              Relégués{" "}
-              {(l1.relegated || []).map((id, i) => (
-                <MiniTeam key={i} club={findClub(LIGUE1, id)} />
-              ))}
+            <p>
+              ⚽ Buteur{" "}
+              <strong>{findPlayer(LIGUE1_SCORERS, l1.topScorer)?.name || "—"}</strong>
             </p>
           </div>
 
@@ -89,12 +101,19 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
                 <MiniTeam key={i} club={findClub(PREMIER_LEAGUE, id)} />
               ))}
             </p>
+            <p>
+              ⚽ Buteur{" "}
+              <strong>{findPlayer(PREMIER_LEAGUE_SCORERS, pl.topScorer)?.name || "—"}</strong>
+            </p>
           </div>
 
           <div className="recap-card__block">
             <h4>🇪🇸 LaLiga</h4>
             <p>
               Champion <MiniTeam club={findClub(LALIGA, ll.champion)} />
+            </p>
+            <p>
+              ⚽ Buteur <strong>{findPlayer(LALIGA_SCORERS, ll.topScorer)?.name || "—"}</strong>
             </p>
           </div>
 
@@ -129,6 +148,9 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
         </div>
 
         <div className="recap-card__footer">
+          <span className="text-muted recap-card__timestamp">
+            {lastModified ? `🔒 Dernière modif. : ${lastModified}` : "📝 Brouillon non envoyé"}
+          </span>
           <span className="pill pill--red">#LesPronosDeSaison</span>
         </div>
       </div>

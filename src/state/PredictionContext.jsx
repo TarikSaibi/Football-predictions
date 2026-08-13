@@ -4,9 +4,9 @@ const STORAGE_KEY = "pronos-saison:draft";
 
 const EMPTY_PREDICTION = {
   displayName: "",
-  ligue1: { champion: null, top4: [null, null, null, null], relegated: [null, null, null] },
-  premierLeague: { champion: null, top4: [null, null, null, null] },
-  laliga: { champion: null },
+  ligue1: { champion: null, top4: [null, null, null, null], topScorer: null },
+  premierLeague: { champion: null, top4: [null, null, null, null], topScorer: null },
+  laliga: { champion: null, topScorer: null },
   ucl: { winner: null, finalist: null },
   awards: { ballonDor: null, topScorer: null, revelation: null, flop: null },
 };
@@ -43,6 +43,7 @@ export function PredictionProvider({ children }) {
           return { ...p, [section]: { ...p[section], [key]: arr } };
         }),
       reset: () => setPrediction(EMPTY_PREDICTION),
+      loadPrediction: (data) => setPrediction({ ...EMPTY_PREDICTION, ...data }),
     }),
     [prediction]
   );

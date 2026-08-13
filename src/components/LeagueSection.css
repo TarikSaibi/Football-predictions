@@ -24,6 +24,10 @@
   gap: 10px;
 }
 
+.league-section__scorer {
+  width: 220px;
+}
+
 .awards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

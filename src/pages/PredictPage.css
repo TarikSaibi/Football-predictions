@@ -11,6 +11,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 14px;
 }
 
@@ -21,6 +22,27 @@
 .predict-page__accent {
   color: var(--red);
   text-shadow: 0 0 20px var(--red-glow);
+}
+
+.predict-page__account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.predict-page__signout {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-mid);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.predict-page__signout:hover {
+  border-color: var(--text-hi);
+  color: var(--text-hi);
 }
 
 .predict-page__name-input {
@@ -50,6 +72,14 @@
 
 .predict-page__recap {
   margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.predict-page__copy-btn {
+  font-size: 0.85rem;
 }
 
 .predict-page__submit {
@@ -59,20 +89,18 @@
   gap: 14px;
 }
 
-.predict-page__summary {
-  width: 100%;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  color: var(--text-mid);
-  font-family: "Courier New", monospace;
-  font-size: 0.82rem;
-  padding: 14px;
-  resize: vertical;
+
+.predict-page__sent {
+  background: rgba(57, 255, 136, 0.1);
+  border: 1px solid rgba(57, 255, 136, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  color: var(--green);
+  font-weight: 600;
 }
 
-.predict-page__actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.predict-page__send-btn {
+  align-self: flex-start;
+  font-size: 1.05rem;
+  padding: 14px 28px;
 }
