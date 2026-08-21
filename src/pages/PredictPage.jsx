@@ -5,7 +5,6 @@ import AwardsSection from "../components/AwardsSection";
 import RecapCard from "../components/RecapCard";
 import { usePrediction } from "../state/PredictionContext";
 import { LIGUE1, PREMIER_LEAGUE, LALIGA } from "../data/clubs";
-import { LIGUE1_SCORERS, PREMIER_LEAGUE_SCORERS, LALIGA_SCORERS } from "../data/players";
 import { isSupabaseConfigured } from "../config/supabase";
 import { sendPrediction, ERR_NAME_TAKEN } from "../utils/predictionsApi";
 import "./PredictPage.css";
@@ -93,7 +92,7 @@ export default function PredictPage() {
           accentColor="#e10600"
           clubs={LIGUE1}
           topCount={3}
-          scorers={LIGUE1_SCORERS}
+          showScorer
         />
         <LeagueSection
           sectionKey="premierLeague"
@@ -102,7 +101,7 @@ export default function PredictPage() {
           accentColor="#3d195b"
           clubs={PREMIER_LEAGUE}
           topCount={6}
-          scorers={PREMIER_LEAGUE_SCORERS}
+          showScorer
         />
         <LeagueSection
           sectionKey="laliga"
@@ -111,7 +110,7 @@ export default function PredictPage() {
           accentColor="#ff4b44"
           clubs={LALIGA}
           topCount={3}
-          scorers={LALIGA_SCORERS}
+          showScorer
         />
         <UCLSection />
         <AwardsSection />

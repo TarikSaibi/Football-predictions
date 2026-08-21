@@ -1,21 +1,10 @@
-import { useState } from "react";
-import PlayerCard from "./PlayerCard";
-import SelectorModal from "./SelectorModal";
 import { usePrediction } from "../state/PredictionContext";
-import { AWARD_CATEGORIES } from "../data/players";
+import { AWARD_CATEGORIES } from "../data/awards";
 import "./LeagueSection.css";
 
+// Récompenses individuelles : saisie libre du nom (pas de liste fermée de joueurs).
 export default function AwardsSection() {
   const { prediction, setField } = usePrediction();
-  const [picker, setPicker] = useState(null); // categoryId
-
-  const category = AWARD_CATEGORIES.find((c) => c.id === picker);
-  const findPlayer = (cat, id) => cat.nominees.find((p) => p.id === id) || null;
-
-  const handlePick = (player) => {
-    setField("awards", picker, player.id);
-    setPicker(null);
-  };
 
   return (
     <section className="league-section glass-panel fade-in" style={{ "--league-accent": "#ffe600" }}>
@@ -30,26 +19,17 @@ export default function AwardsSection() {
             <span className="league-section__label pill pill--yellow">
               {cat.icon} {cat.label}
             </span>
-            <PlayerCard
-              player={findPlayer(cat, prediction.awards[cat.id])}
-              selected={Boolean(prediction.awards[cat.id])}
-              onClick={() => setPicker(cat.id)}
+            <input
+              className="league-section__text-input"
+              type="text"
+              placeholder="Nom du joueur"
+              value={prediction.awards[cat.id] || ""}
+              onChange={(e) => setField("awards", cat.id, e.target.value)}
+              style={{ width: "100%" }}
             />
           </div>
         ))}
       </div>
-
-      {category && (
-        <SelectorModal
-          title={`${category.icon} ${category.label}`}
-          items={category.nominees}
-          getLabel={(p) => p.name}
-          excludeIds={[]}
-          onPick={handlePick}
-          onClose={() => setPicker(null)}
-          renderItem={(player) => <PlayerCard player={player} onClick={() => {}} />}
-        />
-      )}
     </section>
   );
 }

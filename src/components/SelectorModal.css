@@ -17,6 +17,10 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
+  /* .glass-panel dégrade vers un fond quasi transparent en bas (pensé pour des panneaux
+     statiques) : dans une liste qui défile, ça rendait les dernières lignes illisibles.
+     Un fond opaque uniforme garde le contenu lisible sur toute la hauteur. */
+  background: var(--bg-panel-2);
 }
 
 .selector-modal__header {

@@ -2,12 +2,10 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import TeamBadge from "./TeamBadge";
 import { LIGUE1, PREMIER_LEAGUE, LALIGA, UCL_CONTENDERS } from "../data/clubs";
-import { AWARD_CATEGORIES, LIGUE1_SCORERS, PREMIER_LEAGUE_SCORERS, LALIGA_SCORERS } from "../data/players";
-import { flagEmoji } from "../utils/flags";
+import { AWARD_CATEGORIES } from "../data/awards";
 import "./RecapCard.css";
 
 const findClub = (list, id) => list.find((c) => c.id === id) || null;
-const findPlayer = (list, id) => list.find((p) => p.id === id) || null;
 
 function MiniTeam({ club }) {
   if (!club) return <span className="recap-card__empty">—</span>;
@@ -41,11 +39,6 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
   const ucl = prediction.ucl || {};
   const awards = prediction.awards || {};
   const submittedDate = formatDate(prediction.submittedAt);
-
-  const findAward = (catId) => {
-    const cat = AWARD_CATEGORIES.find((c) => c.id === catId);
-    return cat?.nominees.find((p) => p.id === awards[catId]) || null;
-  };
 
   const handleExport = async () => {
     if (!cardRef.current) return;
@@ -85,8 +78,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
               ))}
             </p>
             <p>
-              ⚽ Buteur{" "}
-              <strong>{findPlayer(LIGUE1_SCORERS, l1.topScorer)?.name || "—"}</strong>
+              ⚽ Buteur <strong>{l1.topScorer || "—"}</strong>
             </p>
           </div>
 
@@ -102,8 +94,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
               ))}
             </p>
             <p>
-              ⚽ Buteur{" "}
-              <strong>{findPlayer(PREMIER_LEAGUE_SCORERS, pl.topScorer)?.name || "—"}</strong>
+              ⚽ Buteur <strong>{pl.topScorer || "—"}</strong>
             </p>
           </div>
 
@@ -119,7 +110,7 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
               ))}
             </p>
             <p>
-              ⚽ Buteur <strong>{findPlayer(LALIGA_SCORERS, ll.topScorer)?.name || "—"}</strong>
+              ⚽ Buteur <strong>{ll.topScorer || "—"}</strong>
             </p>
           </div>
 
@@ -136,19 +127,14 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
           <div className="recap-card__block recap-card__block--wide">
             <h4>✨ Récompenses individuelles</h4>
             <div className="recap-card__awards">
-              {AWARD_CATEGORIES.map((cat) => {
-                const player = findAward(cat.id);
-                return (
-                  <div key={cat.id} className="recap-card__award">
-                    <span className="text-muted">
-                      {cat.icon} {cat.label}
-                    </span>
-                    <strong>
-                      {player ? `${flagEmoji(player.country)} ${player.name}` : "—"}
-                    </strong>
-                  </div>
-                );
-              })}
+              {AWARD_CATEGORIES.map((cat) => (
+                <div key={cat.id} className="recap-card__award">
+                  <span className="text-muted">
+                    {cat.icon} {cat.label}
+                  </span>
+                  <strong>{awards[cat.id] || "—"}</strong>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -24,16 +24,24 @@
   gap: 10px;
 }
 
-.league-section__scorer {
+.league-section__text-input {
   width: 220px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--bg-panel);
+  color: var(--text-hi);
+  font-size: 0.95rem;
+}
+
+.league-section__text-input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
 }
 
 .awards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
-}
-
-.awards-grid .player-card {
-  max-width: 320px;
 }

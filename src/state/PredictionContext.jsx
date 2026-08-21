@@ -8,7 +8,7 @@ const EMPTY_PREDICTION = {
   premierLeague: { champion: null, top: [null, null, null, null, null, null], topScorer: null },
   laliga: { champion: null, top: [null, null, null], topScorer: null },
   ucl: { winner: null, finalist: null },
-  awards: { ballonDor: null, topScorer: null, revelation: null, flop: null },
+  awards: { ballonDor2026: null, ballonDor2027: null, topScorer: null, revelation: null, flop: null },
 };
 
 const PredictionContext = createContext(null);
