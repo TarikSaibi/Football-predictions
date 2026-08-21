@@ -1,13 +1,29 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import RecapCard from "../components/RecapCard";
 import { subscribeToPredictions } from "../utils/predictionsApi";
 import { isSupabaseConfigured } from "../config/supabase";
 import "./ParticipantsPage.css";
 
+// Export JSON complet des pronos — bouton volontairement absent de l'UI normale,
+// accessible uniquement via ?export dans l'URL (ex. .../#/participants?export).
+// Aucune donnée sensible : tout est déjà public en lecture (voir supabase/schema.sql).
+function exportPredictions(users) {
+  const blob = new Blob([JSON.stringify(users, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `pronos-de-saison-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function ParticipantsPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [searchParams] = useSearchParams();
+  const showExport = searchParams.has("export");
   const supabaseReady = isSupabaseConfigured();
 
   useEffect(() => {
@@ -85,6 +101,16 @@ export default function ParticipantsPage() {
 
       {!loading && supabaseReady && users.length === 0 && (
         <p className="text-muted">Aucune fiche pour le moment — reviens quand le groupe aura répondu !</p>
+      )}
+
+      {showExport && (
+        <button
+          className="btn btn--ghost participants-page__export-btn"
+          onClick={() => exportPredictions(users)}
+          type="button"
+        >
+          ⬇️ Export JSON ({users.length})
+        </button>
       )}
     </div>
   );

@@ -62,3 +62,14 @@
   display: flex;
   justify-content: center;
 }
+
+.participants-page__export-btn {
+  align-self: center;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.participants-page__export-btn:hover {
+  opacity: 1;
+}

@@ -79,8 +79,8 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
               Champion <MiniTeam club={findClub(LIGUE1, l1.champion)} />
             </p>
             <p className="recap-card__row">
-              TOP 4{" "}
-              {(l1.top4 || []).map((id, i) => (
+              TOP {(l1.top || []).length || 3}{" "}
+              {(l1.top || []).map((id, i) => (
                 <MiniTeam key={i} club={findClub(LIGUE1, id)} />
               ))}
             </p>
@@ -96,8 +96,8 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
               Champion <MiniTeam club={findClub(PREMIER_LEAGUE, pl.champion)} />
             </p>
             <p className="recap-card__row">
-              TOP 4{" "}
-              {(pl.top4 || []).map((id, i) => (
+              TOP {(pl.top || []).length || 6}{" "}
+              {(pl.top || []).map((id, i) => (
                 <MiniTeam key={i} club={findClub(PREMIER_LEAGUE, id)} />
               ))}
             </p>
@@ -111,6 +111,12 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
             <h4>🇪🇸 LaLiga</h4>
             <p>
               Champion <MiniTeam club={findClub(LALIGA, ll.champion)} />
+            </p>
+            <p className="recap-card__row">
+              TOP {(ll.top || []).length || 3}{" "}
+              {(ll.top || []).map((id, i) => (
+                <MiniTeam key={i} club={findClub(LALIGA, id)} />
+              ))}
             </p>
             <p>
               ⚽ Buteur <strong>{findPlayer(LALIGA_SCORERS, ll.topScorer)?.name || "—"}</strong>

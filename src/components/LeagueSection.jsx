@@ -5,22 +5,22 @@ import SelectorModal from "./SelectorModal";
 import { usePrediction } from "../state/PredictionContext";
 import "./LeagueSection.css";
 
-// Section générique "Championnat" : Champion (+ éventuellement TOP4 / Meilleur buteur).
-export default function LeagueSection({ sectionKey, title, icon, accentColor, clubs, showTop4, scorers }) {
+// Section générique "Championnat" : Champion (+ éventuellement TOP N / Meilleur buteur).
+export default function LeagueSection({ sectionKey, title, icon, accentColor, clubs, topCount, scorers }) {
   const { prediction, setField, setArrayField } = usePrediction();
   const data = prediction[sectionKey];
-  const [picker, setPicker] = useState(null); // { type: 'champion' | 'top4' | 'scorer', index }
+  const [picker, setPicker] = useState(null); // { type: 'champion' | 'top' | 'scorer', index }
 
   const findClub = (id) => clubs.find((c) => c.id === id) || null;
   const findScorer = (id) => scorers?.find((p) => p.id === id) || null;
 
-  const usedClubIds = [data.champion, ...(data.top4 || [])].filter(Boolean);
+  const usedClubIds = [data.champion, ...(data.top || [])].filter(Boolean);
 
   const closePicker = () => setPicker(null);
 
   const handlePickClub = (club) => {
     if (picker.type === "champion") setField(sectionKey, "champion", club.id);
-    if (picker.type === "top4") setArrayField(sectionKey, "top4", picker.index, club.id);
+    if (picker.type === "top") setArrayField(sectionKey, "top", picker.index, club.id);
     closePicker();
   };
 
@@ -49,16 +49,16 @@ export default function LeagueSection({ sectionKey, title, icon, accentColor, cl
           />
         </div>
 
-        {showTop4 && (
+        {topCount > 0 && (
           <div className="league-section__group">
-            <span className="league-section__label pill pill--green">TOP 4</span>
+            <span className="league-section__label pill pill--green">TOP {topCount}</span>
             <div className="league-section__slots">
-              {data.top4.map((id, i) => (
+              {data.top.map((id, i) => (
                 <TeamSlot
                   key={i}
                   label={`#${i + 1}`}
                   club={findClub(id)}
-                  onClick={() => setPicker({ type: "top4", index: i })}
+                  onClick={() => setPicker({ type: "top", index: i })}
                 />
               ))}
             </div>
