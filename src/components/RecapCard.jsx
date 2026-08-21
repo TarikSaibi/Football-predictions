@@ -7,8 +7,8 @@ import "./RecapCard.css";
 
 const findClub = (list, id) => list.find((c) => c.id === id) || null;
 
-function MiniTeam({ club }) {
-  if (!club) return <span className="recap-card__empty">—</span>;
+function MiniTeam({ club, fallbackText }) {
+  if (!club) return <span className="recap-card__empty">{fallbackText || "—"}</span>;
   return (
     <span className="recap-card__mini-team">
       <TeamBadge club={club} size={26} />
@@ -117,10 +117,10 @@ export default function RecapCard({ prediction, accentColor = "#e10600" }) {
           <div className="recap-card__block">
             <h4>🏆 Ligue des Champions</h4>
             <p>
-              Vainqueur <MiniTeam club={findClub(UCL_CONTENDERS, ucl.winner)} />
+              Vainqueur <MiniTeam club={findClub(UCL_CONTENDERS, ucl.winner)} fallbackText={ucl.winner} />
             </p>
             <p>
-              Finaliste <MiniTeam club={findClub(UCL_CONTENDERS, ucl.finalist)} />
+              Finaliste <MiniTeam club={findClub(UCL_CONTENDERS, ucl.finalist)} fallbackText={ucl.finalist} />
             </p>
           </div>
 

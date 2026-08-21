@@ -5,6 +5,9 @@ import { usePrediction } from "../state/PredictionContext";
 import { UCL_CONTENDERS } from "../data/clubs";
 import "./LeagueSection.css";
 
+// Vainqueur / finaliste : choix rapide parmi les prétendants habituels, ou saisie libre
+// si le club prédit n'est pas dans la liste (ex. outsider). Les deux écrivent dans le
+// même champ : un club choisi dans la liste écrase une saisie libre, et inversement.
 export default function UCLSection() {
   const { prediction, setField } = usePrediction();
   const data = prediction.ucl;
@@ -18,6 +21,24 @@ export default function UCLSection() {
     setPicker(null);
   };
 
+  const renderPick = (key, label, pillClass) => {
+    const club = findClub(data[key]);
+    const freeText = data[key] && !club ? data[key] : "";
+    return (
+      <div className="league-section__group">
+        <span className={`league-section__label pill ${pillClass}`}>{label}</span>
+        <TeamSlot label={label} size="lg" club={club} onClick={() => setPicker(key)} />
+        <input
+          className="league-section__text-input"
+          type="text"
+          placeholder="Autre club (saisie libre)"
+          value={freeText}
+          onChange={(e) => setField("ucl", key, e.target.value)}
+        />
+      </div>
+    );
+  };
+
   return (
     <section className="league-section glass-panel fade-in" style={{ "--league-accent": "#2d8cff" }}>
       <div className="section-title">
@@ -26,14 +47,8 @@ export default function UCLSection() {
       </div>
 
       <div className="league-section__row">
-        <div className="league-section__group">
-          <span className="league-section__label pill pill--yellow">Vainqueur</span>
-          <TeamSlot label="Vainqueur" size="lg" club={findClub(data.winner)} onClick={() => setPicker("winner")} />
-        </div>
-        <div className="league-section__group">
-          <span className="league-section__label pill pill--green">Finaliste</span>
-          <TeamSlot label="Finaliste" size="lg" club={findClub(data.finalist)} onClick={() => setPicker("finalist")} />
-        </div>
+        {renderPick("winner", "Vainqueur", "pill--yellow")}
+        {renderPick("finalist", "Finaliste", "pill--green")}
       </div>
 
       {picker && (
